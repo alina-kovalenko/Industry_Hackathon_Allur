@@ -1,0 +1,61 @@
+{
+  "created_by": "scripts/profile_data.py",
+  "sources": [
+    {
+      "id": "xpertsystems/mfg005-sample",
+      "grain": "synthetic shift x line",
+      "rows": 3000,
+      "lines": 36,
+      "date_min": "2020-01-01",
+      "date_max": "2024-12-30",
+      "unplanned_downtime_positive_pct": 94.43,
+      "oee_pct": {
+        "mean": 65.2768,
+        "min": 2.96,
+        "max": 99.88
+      },
+      "license": "CC-BY-NC-4.0"
+    },
+    {
+      "id": "Zenodo 17855209 clay",
+      "grain": "whole-line production shift",
+      "before_oee_rows": 65,
+      "after_lss_oee_rows": 43,
+      "before_oee_fraction": {
+        "mean": 0.5907,
+        "min": 0.1408,
+        "max": 0.9003
+      },
+      "after_lss_oee_fraction": {
+        "mean": 0.643,
+        "min": 0.3908,
+        "max": 0.754
+      },
+      "before_downtime_event_rows": 635,
+      "after_lss_downtime_event_rows": 3022,
+      "license": "CC-BY-4.0"
+    },
+    {
+      "id": "Zenodo 17649175 automotive inspection",
+      "grain": "monthly aggregate",
+      "months": 6,
+      "oee_pct": {
+        "mean": 89.3009,
+        "min": 87.4268,
+        "max": 92.9
+      },
+      "downtime_minutes": {
+        "mean": 106.3333,
+        "min": 0.0,
+        "max": 154.0
+      },
+      "cpk": {
+        "mean": 0.9808,
+        "min": 0.3722,
+        "max": 2.1072
+      },
+      "license": "CC-BY-4.0"
+    }
+  ],
+  "pooling": "Sources remain separate: synthetic shift-line observations, real heavy-clay line shifts/events, and automotive monthly aggregates are different populations and temporal grains."
+}
