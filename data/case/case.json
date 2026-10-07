@@ -1,0 +1,24 @@
+{
+  "production": [
+    {"date":"2026-10-01","line_id":"welding","name":"Сварка-1","section":"Сварка","planned_units":120,"actual_units":118,"runtime_hours":7.8,"utilization_pct":98,"defects":2},
+    {"date":"2026-10-01","line_id":"painting","name":"Окраска-1","section":"Окраска","planned_units":120,"actual_units":115,"runtime_hours":7.5,"utilization_pct":94,"defects":4},
+    {"date":"2026-10-01","line_id":"assembly","name":"Сборка-1","section":"Сборка","planned_units":120,"actual_units":121,"runtime_hours":8.0,"utilization_pct":100,"defects":1},
+    {"date":"2026-10-02","line_id":"welding","name":"Сварка-1","section":"Сварка","planned_units":120,"actual_units":111,"runtime_hours":7.2,"utilization_pct":91,"defects":3},
+    {"date":"2026-10-02","line_id":"painting","name":"Окраска-1","section":"Окраска","planned_units":120,"actual_units":116,"runtime_hours":7.7,"utilization_pct":96,"defects":6},
+    {"date":"2026-10-02","line_id":"assembly","name":"Сборка-1","section":"Сборка","planned_units":120,"actual_units":119,"runtime_hours":7.9,"utilization_pct":99,"defects":2}
+  ],
+  "downtime": [
+    {"date":"2026-10-01","line_id":"welding","equipment":"ABB-01","reason":"Ошибка датчика","duration_minutes":25,"planned":false},
+    {"date":"2026-10-01","line_id":"painting","equipment":"Камера-02","reason":"Замена фильтра","duration_minutes":40,"planned":false},
+    {"date":"2026-10-02","line_id":"assembly","equipment":"Конвейер-03","reason":"Обрыв цепи","duration_minutes":55,"planned":false},
+    {"date":"2026-10-02","line_id":"welding","equipment":"ABB-04","reason":"Плановое ТО","duration_minutes":30,"planned":true}
+  ],
+  "monthly_plan": [
+    {"model":"Chevrolet Onix","units":2500},
+    {"model":"Chevrolet Cobalt","units":1800},
+    {"model":"JAC J7","units":500}
+  ],
+  "targets": {"oee_pct":85,"defect_pct":2,"max_equipment_downtime_minutes":60,"monthly_units":5500,"shifts_per_day":2,"hours_per_shift":8},
+  "flow": ["Склад комплектующих","Сварка","Окраска","Сборка","Контроль качества","Склад готовой продукции"],
+  "source": "Тестовые данные кейса «Цифровой двойник завода» (01–02.10.2026); предоставлены для демонстрации, не телеметрия реального времени."
+}
