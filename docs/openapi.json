@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Allur Digital Twin",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "paths": {
     "/api/health": {
@@ -121,10 +121,16 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "number",
-              "maximum": 24,
-              "minimum": 1,
-              "default": 8,
+              "anyOf": [
+                {
+                  "type": "number",
+                  "maximum": 24,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "title": "Scheduled Hours"
             }
           }
@@ -180,10 +186,16 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "number",
-              "maximum": 24,
-              "minimum": 1,
-              "default": 8,
+              "anyOf": [
+                {
+                  "type": "number",
+                  "maximum": 24,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "title": "Scheduled Hours"
             }
           }
@@ -206,6 +218,280 @@
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/session": {
+      "get": {
+        "summary": "Get Session",
+        "operationId": "get_session_api_session_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/history": {
+      "get": {
+        "summary": "Get History",
+        "operationId": "get_history_api_history_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "after_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "After Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/history": {
+      "get": {
+        "summary": "Get History",
+        "operationId": "get_history_history_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "after_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "After Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scenarios/run": {
+      "post": {
+        "summary": "Apply Scenario",
+        "operationId": "apply_scenario_api_scenarios_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StopScenarioInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/scenario": {
+      "post": {
+        "summary": "Apply Scenario",
+        "operationId": "apply_scenario_scenario_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StopScenarioInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reset": {
+      "post": {
+        "summary": "Reset Scenario",
+        "operationId": "reset_scenario_api_reset_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reset": {
+      "post": {
+        "summary": "Reset Scenario",
+        "operationId": "reset_scenario_reset_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/replay/start": {
+      "post": {
+        "summary": "Start Replay",
+        "operationId": "start_replay_api_replay_start_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplayInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/replay/stop": {
+      "post": {
+        "summary": "Stop Replay",
+        "operationId": "stop_replay_api_replay_stop_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           }
@@ -591,6 +877,37 @@
           "defects"
         ],
         "title": "ProductionRecord"
+      },
+      "ReplayInput": {
+        "properties": {
+          "interval_seconds": {
+            "type": "number",
+            "maximum": 60.0,
+            "minimum": 0.5,
+            "title": "Interval Seconds",
+            "default": 3
+          },
+          "loop": {
+            "type": "boolean",
+            "title": "Loop",
+            "default": true
+          },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ReplayInput"
       },
       "ScenarioInput": {
         "properties": {

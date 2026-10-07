@@ -5,17 +5,18 @@ from datetime import date as Date
 import json
 import os
 from pathlib import Path
-from threading import RLock
 from typing import Annotated, Literal
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from allur.engine import build_dashboard, load_case, simulate
 from allur.ml import model_status, predict_risk
 from allur.integration import build_state, calculate_stop_scenario
+from allur.session import LineSession
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -72,6 +73,12 @@ class StopScenarioInput(StrictInput):
         if self.stop_minutes > self.horizon_minutes:
             raise ValueError("Остановка не может быть длиннее горизонта сценария.")
         return self
+
+
+class ReplayInput(StrictInput):
+    interval_seconds: float = Field(default=3, ge=0.5, le=60)
+    loop: bool = True
+    date: Date | None = None
 
 
 class ProductionRecord(StrictInput):
@@ -156,11 +163,12 @@ def local_answer(question: str, dashboard: dict) -> dict:
 
 
 def create_app(initial_case: dict | None = None) -> FastAPI:
-    app = FastAPI(title="Allur Digital Twin", version="1.0.0", docs_url="/docs")
-    state = deepcopy(initial_case) if initial_case is not None else load_case()
-    lock = RLock()
+    app = FastAPI(title="Allur Digital Twin", version="1.1.0", docs_url="/docs")
+    session = LineSession(initial_case if initial_case is not None else load_case())
+    state = session.case
+    lock = session.lock
     app.state.case = state
-    app.state.revision = 0
+    app.state.session = session
     origins = [s.strip().rstrip("/") for s in os.environ.get("ALLUR_ALLOWED_ORIGINS", "").split(",") if s.strip()]
     if origins:
         app.add_middleware(CORSMiddleware, allow_origins=origins,
@@ -184,18 +192,17 @@ def create_app(initial_case: dict | None = None) -> FastAPI:
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "no-referrer"
         response.headers["X-Frame-Options"] = "DENY"
-        if request.url.path.startswith("/api/"):
+        if request.url.path.startswith("/api/") or request.url.path in {"/state", "/history", "/scenario", "/reset"}:
             response.headers["Cache-Control"] = "no-store"
         return response
 
     def snapshot():
-        with lock:
-            return deepcopy(state)
+        return session.capture()[0]
 
     def dashboard(selected: Date | None, hours: float):
-        data = snapshot()
+        data, revision, active_date, _ = session.capture()
         try:
-            result = build_dashboard(data, selected.isoformat() if selected else None, hours)
+            result = build_dashboard(data, selected.isoformat() if selected else active_date, hours)
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
         # Historical replay must never leak records after the selected date.
@@ -204,12 +211,12 @@ def create_app(initial_case: dict | None = None) -> FastAPI:
         result["source"] = data.get("source", "")
         result["prediction"] = predict_risk(history, scheduled_hours=hours)
         result["model"] = model_status()
-        result["revision"] = app.state.revision
+        result["revision"] = revision
         return result
 
     @app.get("/api/health")
     def health():
-        return {"status": "ok", "version": "1.0.0", "mode": "local_demo", "revision": app.state.revision}
+        return {"status": "ok", "version": "1.1.0", "mode": "local_demo", "revision": session.metadata()["revision"]}
 
     @app.get("/api/dashboard")
     def get_dashboard(date: Date | None = None, scheduled_hours: Annotated[float, Query(ge=1, le=24, allow_inf_nan=False)] = 8):
@@ -221,11 +228,51 @@ def create_app(initial_case: dict | None = None) -> FastAPI:
 
     @app.get("/state", response_model=StateResponse)
     @app.get("/api/state", response_model=StateResponse)
-    def get_state(date: Date | None = None, scheduled_hours: Annotated[float, Query(ge=1, le=24, allow_inf_nan=False)] = 8):
+    def get_state(date: Date | None = None, scheduled_hours: Annotated[float | None, Query(ge=1, le=24, allow_inf_nan=False)] = None):
+        if date is None and scheduled_hours is None:
+            return session.current_state()
         try:
-            return build_state(snapshot(), date.isoformat() if date else None, scheduled_hours)
+            data, _, active_date, hours = session.capture()
+            return build_state(data, date.isoformat() if date else active_date, scheduled_hours or hours)
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.get("/api/session")
+    def get_session():
+        with lock:
+            result = session.metadata()
+            result["observed_dashboard"] = dashboard(Date.fromisoformat(result["date"]), result["scheduled_hours"])
+            return result
+
+    @app.get("/history")
+    @app.get("/api/history")
+    def get_history(limit: Annotated[int, Query(ge=1, le=500)] = 50,
+                    after_id: Annotated[int, Query(ge=0)] = 0):
+        return session.history(limit, after_id)
+
+    @app.post("/scenario")
+    @app.post("/api/scenarios/run")
+    def apply_scenario(body: StopScenarioInput):
+        try:
+            return session.apply(body.model_dump(mode="json", exclude_none=True))
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.post("/reset")
+    @app.post("/api/reset")
+    def reset_scenario():
+        return session.reset()
+
+    @app.post("/api/replay/start")
+    def start_replay(body: ReplayInput):
+        try:
+            return session.start_replay(body.interval_seconds, body.loop, body.date.isoformat() if body.date else None)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.post("/api/replay/stop")
+    def stop_replay():
+        return session.stop_replay()
 
     @app.post("/api/scenarios/stop")
     def stop_scenario(body: StopScenarioInput):
@@ -281,12 +328,16 @@ def create_app(initial_case: dict | None = None) -> FastAPI:
                     raise HTTPException(status_code=422, detail=f"Для {day} нужны записи всех трёх линий.")
             state["production"] = sorted(merged.values(), key=lambda r: (r["date"], r["line_id"]))
             state["source"] = "Тестовые данные Allur и JSON-импорт текущего сеанса; импорт не сохраняется после перезапуска."
-            app.state.revision += 1
-        return {"accepted": len(updates), "revision": app.state.revision, "persistence": "session_only", "message": "Импортированы только производственные показатели. Журнал простоев не изменён."}
+            session.ingested(len(updates))
+            revision = session.revision
+        return {"accepted": len(updates), "revision": revision, "persistence": "session_only", "message": "Импортированы только производственные показатели. Журнал простоев не изменён."}
 
     @app.get("/")
     def index():
-        return {"service": "Allur AI backend", "version": "1.0.0", "state": "/state", "openapi": "/openapi.json", "docs": "/docs"}
+        return {"service": "Allur AI backend", "version": "1.1.0", "state": "/state", "openapi": "/openapi.json", "docs": "/docs", "frontend": "/app/"}
+    frontend = ROOT / "frontend" / "dist"
+    if frontend.is_dir():
+        app.mount("/app", StaticFiles(directory=frontend, html=True), name="frontend")
     return app
 
 
