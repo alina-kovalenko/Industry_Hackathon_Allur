@@ -1,4 +1,9 @@
 .venv/
+.venv-review/
+wheelhouse/
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo
 venv/
 __pycache__/
 *.py[cod]
