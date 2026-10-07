@@ -1,0 +1,80 @@
+{
+  "source": "xpertsystems/mfg005-sample at 427854b6ec8cddc3f929685d9efd58bfdc2a8af3",
+  "synthetic": true,
+  "rows_after_pairing": 2964,
+  "distinct_target_dates": 1473,
+  "positive_rate_all": 0.4413,
+  "positive_rate_test": 0.4571,
+  "model_test_metrics": {
+    "prevalence": 0.4571,
+    "accuracy": 0.5451,
+    "precision": 0.5013,
+    "recall": 0.9296,
+    "f1": 0.6513,
+    "false_positive_rate": 0.7787,
+    "confusion_matrix": {
+      "tn": 56,
+      "fp": 197,
+      "fn": 15,
+      "tp": 198
+    },
+    "brier": 0.2423,
+    "threshold": 0.42,
+    "roc_auc": 0.6164,
+    "average_precision": 0.5468
+  },
+  "constant_prevalence_baseline_test_metrics": {
+    "prevalence": 0.4571,
+    "accuracy": 0.5429,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "false_positive_rate": 0.0,
+    "confusion_matrix": {
+      "tn": 253,
+      "fp": 0,
+      "fn": 213,
+      "tp": 0
+    },
+    "brier": 0.2483,
+    "threshold": 0.5,
+    "roc_auc": 0.5,
+    "average_precision": 0.4571
+  },
+  "always_positive_baseline_test_metrics": {
+    "prevalence": 0.4571,
+    "accuracy": 0.4571,
+    "precision": 0.4571,
+    "recall": 1.0,
+    "f1": 0.6274,
+    "false_positive_rate": 1.0,
+    "confusion_matrix": {
+      "tn": 0,
+      "fp": 253,
+      "fn": 0,
+      "tp": 213
+    },
+    "brier": 0.5429,
+    "threshold": 0.5,
+    "roc_auc": 0.5,
+    "average_precision": 0.4571
+  },
+  "features": [
+    "availability_pct",
+    "plan_attainment_pct",
+    "quality_yield_pct"
+  ],
+  "feature_timing": "features at current record t only; outcome from next same-line record t+1",
+  "split": "date-ordered 70/15/15 by unique target shift_date; no date is shared across partitions",
+  "next_record_interval_days_test": {
+    "median": 14.0,
+    "max": 129
+  },
+  "limitations": [
+    "\u041e\u0431\u0443\u0447\u0435\u043d\u0438\u0435 \u043f\u0440\u043e\u0432\u0435\u0434\u0435\u043d\u043e \u043d\u0430 \u0441\u0438\u043d\u0442\u0435\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0445 \u0441\u043c\u0435\u043d\u043d\u044b\u0445 \u0434\u0430\u043d\u043d\u044b\u0445 MFG-005; \u044d\u0442\u043e \u043d\u0435 \u0434\u0430\u043d\u043d\u044b\u0435 Allur.",
+    "Score \u043c\u043e\u0434\u0435\u043b\u0438 \u043d\u0435 \u043a\u0430\u043b\u0438\u0431\u0440\u043e\u0432\u0430\u043d \u0438 \u043d\u0435 \u044f\u0432\u043b\u044f\u0435\u0442\u0441\u044f \u0432\u0435\u0440\u043e\u044f\u0442\u043d\u043e\u0441\u0442\u044c\u044e \u043e\u0442\u043a\u0430\u0437\u0430.",
+    "\u0413\u043e\u0440\u0438\u0437\u043e\u043d\u0442 \u2014 \u0441\u043b\u0435\u0434\u0443\u044e\u0449\u0430\u044f \u0438\u043c\u0435\u044e\u0449\u0430\u044f\u0441\u044f \u0437\u0430\u043f\u0438\u0441\u044c \u0442\u043e\u0439 \u0436\u0435 \u043b\u0438\u043d\u0438\u0438; \u0438\u043d\u0442\u0435\u0440\u0432\u0430\u043b\u044b \u043c\u0435\u0436\u0434\u0443 \u0441\u043c\u0435\u043d\u0430\u043c\u0438 \u043d\u0435\u0440\u0435\u0433\u0443\u043b\u044f\u0440\u043d\u044b.",
+    "\u0410\u0434\u0430\u043f\u0442\u0435\u0440 \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u0435\u0442 runtime_hours / scheduled_hours, \u0432\u044b\u043f\u043e\u043b\u043d\u0435\u043d\u0438\u0435 \u043f\u043b\u0430\u043d\u0430 \u0438 \u0432\u044b\u0445\u043e\u0434 \u0433\u043e\u0434\u043d\u043e\u0439 \u043f\u0440\u043e\u0434\u0443\u043a\u0446\u0438\u0438 \u0438\u0437 \u0434\u043d\u0435\u0432\u043d\u044b\u0445 \u0441\u0442\u0440\u043e\u043a Allur; \u0441\u043e\u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0438\u0435 \u0441\u043c\u0435\u043d\u043d\u044b\u043c \u0441\u0438\u043d\u0442\u0435\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u043c \u043f\u0440\u0438\u0437\u043d\u0430\u043a\u0430\u043c \u0438 \u043f\u0435\u0440\u0435\u043d\u043e\u0441\u0438\u043c\u043e\u0441\u0442\u044c \u043d\u0435 \u043f\u0440\u043e\u0432\u0435\u0440\u0435\u043d\u044b.",
+    "\u041f\u043e\u0440\u043e\u0433 \u0441\u043e\u0431\u044b\u0442\u0438\u044f: \u043d\u0435 \u043c\u0435\u043d\u0435\u0435 60 \u043c\u0438\u043d\u0443\u0442 \u043d\u0435\u0437\u0430\u043f\u043b\u0430\u043d\u0438\u0440\u043e\u0432\u0430\u043d\u043d\u043e\u0433\u043e \u043f\u0440\u043e\u0441\u0442\u043e\u044f \u0432 \u0441\u043b\u0435\u0434\u0443\u044e\u0449\u0435\u0439 \u0437\u0430\u043f\u0438\u0441\u0438."
+  ]
+}

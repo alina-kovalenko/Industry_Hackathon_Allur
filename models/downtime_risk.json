@@ -1,0 +1,98 @@
+{
+  "model_version": 1,
+  "mode": "experimental_external_benchmark",
+  "algorithm": "standardized_logistic_regression",
+  "features": [
+    "availability_pct",
+    "plan_attainment_pct",
+    "quality_yield_pct"
+  ],
+  "mean": [
+    85.91038194444438,
+    65.53343237573453,
+    99.37051622960152
+  ],
+  "scale": [
+    11.038807819611925,
+    13.691887217881849,
+    0.5877534123154097
+  ],
+  "coefficients": [
+    -0.3323899846592529,
+    -0.0021335901108077695,
+    0.06493772367240488
+  ],
+  "intercept": -0.0030320522561854066,
+  "threshold": 0.41999999999999993,
+  "target": "next same-line record has >= 60 minutes unplanned downtime",
+  "horizon": "\u0441\u043b\u0435\u0434\u0443\u044e\u0449\u0430\u044f \u0438\u043c\u0435\u044e\u0449\u0430\u044f\u0441\u044f \u0441\u043c\u0435\u043d\u043d\u0430\u044f \u0437\u0430\u043f\u0438\u0441\u044c \u0442\u043e\u0439 \u0436\u0435 \u043b\u0438\u043d\u0438\u0438 (\u0438\u043d\u0442\u0435\u0440\u0432\u0430\u043b\u044b \u043c\u043e\u0433\u0443\u0442 \u0431\u044b\u0442\u044c \u043d\u0435\u0440\u0435\u0433\u0443\u043b\u044f\u0440\u043d\u044b)",
+  "training_rows": 2016,
+  "validation_rows": 482,
+  "test_rows": 466,
+  "date_boundaries": {
+    "train_through": "2023-07-03",
+    "validation_through": "2024-04-02",
+    "test_from": "2024-04-03"
+  },
+  "test_metrics": {
+    "prevalence": 0.4571,
+    "accuracy": 0.5451,
+    "precision": 0.5013,
+    "recall": 0.9296,
+    "f1": 0.6513,
+    "false_positive_rate": 0.7787,
+    "confusion_matrix": {
+      "tn": 56,
+      "fp": 197,
+      "fn": 15,
+      "tp": 198
+    },
+    "brier": 0.2423,
+    "threshold": 0.42,
+    "roc_auc": 0.6164,
+    "average_precision": 0.5468
+  },
+  "baseline_metrics": {
+    "prevalence": 0.4571,
+    "accuracy": 0.4571,
+    "precision": 0.4571,
+    "recall": 1.0,
+    "f1": 0.6274,
+    "false_positive_rate": 1.0,
+    "confusion_matrix": {
+      "tn": 0,
+      "fp": 253,
+      "fn": 0,
+      "tp": 213
+    },
+    "brier": 0.5429,
+    "threshold": 0.5,
+    "roc_auc": 0.5,
+    "average_precision": 0.4571
+  },
+  "constant_prevalence_baseline_metrics": {
+    "prevalence": 0.4571,
+    "accuracy": 0.5429,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "false_positive_rate": 0.0,
+    "confusion_matrix": {
+      "tn": 253,
+      "fp": 0,
+      "fn": 213,
+      "tp": 0
+    },
+    "brier": 0.2483,
+    "threshold": 0.5,
+    "roc_auc": 0.5,
+    "average_precision": 0.4571
+  },
+  "limitations": [
+    "\u041e\u0431\u0443\u0447\u0435\u043d\u0438\u0435 \u043f\u0440\u043e\u0432\u0435\u0434\u0435\u043d\u043e \u043d\u0430 \u0441\u0438\u043d\u0442\u0435\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0445 \u0441\u043c\u0435\u043d\u043d\u044b\u0445 \u0434\u0430\u043d\u043d\u044b\u0445 MFG-005; \u044d\u0442\u043e \u043d\u0435 \u0434\u0430\u043d\u043d\u044b\u0435 Allur.",
+    "Score \u043c\u043e\u0434\u0435\u043b\u0438 \u043d\u0435 \u043a\u0430\u043b\u0438\u0431\u0440\u043e\u0432\u0430\u043d \u0438 \u043d\u0435 \u044f\u0432\u043b\u044f\u0435\u0442\u0441\u044f \u0432\u0435\u0440\u043e\u044f\u0442\u043d\u043e\u0441\u0442\u044c\u044e \u043e\u0442\u043a\u0430\u0437\u0430.",
+    "\u0413\u043e\u0440\u0438\u0437\u043e\u043d\u0442 \u2014 \u0441\u043b\u0435\u0434\u0443\u044e\u0449\u0430\u044f \u0438\u043c\u0435\u044e\u0449\u0430\u044f\u0441\u044f \u0437\u0430\u043f\u0438\u0441\u044c \u0442\u043e\u0439 \u0436\u0435 \u043b\u0438\u043d\u0438\u0438; \u0438\u043d\u0442\u0435\u0440\u0432\u0430\u043b\u044b \u043c\u0435\u0436\u0434\u0443 \u0441\u043c\u0435\u043d\u0430\u043c\u0438 \u043d\u0435\u0440\u0435\u0433\u0443\u043b\u044f\u0440\u043d\u044b.",
+    "\u0410\u0434\u0430\u043f\u0442\u0435\u0440 \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u0435\u0442 runtime_hours / scheduled_hours, \u0432\u044b\u043f\u043e\u043b\u043d\u0435\u043d\u0438\u0435 \u043f\u043b\u0430\u043d\u0430 \u0438 \u0432\u044b\u0445\u043e\u0434 \u0433\u043e\u0434\u043d\u043e\u0439 \u043f\u0440\u043e\u0434\u0443\u043a\u0446\u0438\u0438 \u0438\u0437 \u0434\u043d\u0435\u0432\u043d\u044b\u0445 \u0441\u0442\u0440\u043e\u043a Allur; \u0441\u043e\u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0438\u0435 \u0441\u043c\u0435\u043d\u043d\u044b\u043c \u0441\u0438\u043d\u0442\u0435\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u043c \u043f\u0440\u0438\u0437\u043d\u0430\u043a\u0430\u043c \u0438 \u043f\u0435\u0440\u0435\u043d\u043e\u0441\u0438\u043c\u043e\u0441\u0442\u044c \u043d\u0435 \u043f\u0440\u043e\u0432\u0435\u0440\u0435\u043d\u044b.",
+    "\u041f\u043e\u0440\u043e\u0433 \u0441\u043e\u0431\u044b\u0442\u0438\u044f: \u043d\u0435 \u043c\u0435\u043d\u0435\u0435 60 \u043c\u0438\u043d\u0443\u0442 \u043d\u0435\u0437\u0430\u043f\u043b\u0430\u043d\u0438\u0440\u043e\u0432\u0430\u043d\u043d\u043e\u0433\u043e \u043f\u0440\u043e\u0441\u0442\u043e\u044f \u0432 \u0441\u043b\u0435\u0434\u0443\u044e\u0449\u0435\u0439 \u0437\u0430\u043f\u0438\u0441\u0438."
+  ]
+}
