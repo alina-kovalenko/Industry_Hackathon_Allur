@@ -1,0 +1,60 @@
+{
+  "records": [
+    {
+      "date": "2026-10-01",
+      "line_id": "welding",
+      "planned_units": 120,
+      "actual_units": 118,
+      "runtime_hours": 7.8,
+      "utilization_pct": 98,
+      "defects": 2
+    },
+    {
+      "date": "2026-10-01",
+      "line_id": "painting",
+      "planned_units": 120,
+      "actual_units": 115,
+      "runtime_hours": 7.5,
+      "utilization_pct": 94,
+      "defects": 4
+    },
+    {
+      "date": "2026-10-01",
+      "line_id": "assembly",
+      "planned_units": 120,
+      "actual_units": 121,
+      "runtime_hours": 8.0,
+      "utilization_pct": 100,
+      "defects": 1
+    },
+    {
+      "date": "2026-10-02",
+      "line_id": "welding",
+      "planned_units": 120,
+      "actual_units": 111,
+      "runtime_hours": 7.2,
+      "utilization_pct": 91,
+      "defects": 3
+    },
+    {
+      "date": "2026-10-02",
+      "line_id": "painting",
+      "planned_units": 120,
+      "actual_units": 116,
+      "runtime_hours": 7.7,
+      "utilization_pct": 96,
+      "defects": 6
+    },
+    {
+      "date": "2026-10-02",
+      "line_id": "assembly",
+      "planned_units": 120,
+      "actual_units": 119,
+      "runtime_hours": 7.9,
+      "utilization_pct": 99,
+      "defects": 2
+    }
+  ],
+  "scheduled_hours": 8,
+  "as_of": "2026-10-02"
+}

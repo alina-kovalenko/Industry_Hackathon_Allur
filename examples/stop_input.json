@@ -1,0 +1,8 @@
+{
+  "id": "painting",
+  "equipment_id": "Камера-02",
+  "date": "2026-10-02",
+  "scheduled_hours": 8,
+  "horizon_minutes": 480,
+  "stop_minutes": 60
+}

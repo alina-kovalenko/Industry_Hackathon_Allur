@@ -1,0 +1,82 @@
+{
+  "date": "2026-10-02",
+  "id": "painting",
+  "equipment_id": "Камера-02",
+  "scheduled_hours": 8.0,
+  "horizon_minutes": 480.0,
+  "stop_minutes": 60.0,
+  "units": "good units over the selected horizon; capacities and flows are fractional estimates",
+  "baseline": {
+    "good_units": 100.69255288322225,
+    "stages": [
+      {
+        "id": "welding",
+        "input_units": null,
+        "gross_capacity_units": 111.0,
+        "effective_capacity_units": 111.0,
+        "processed_units": 111.0,
+        "good_output_units": 108.0
+      },
+      {
+        "id": "painting",
+        "input_units": 108.0,
+        "gross_capacity_units": 116.0,
+        "effective_capacity_units": 116.0,
+        "processed_units": 108.0,
+        "good_output_units": 102.41379310344827
+      },
+      {
+        "id": "assembly",
+        "input_units": 102.41379310344827,
+        "gross_capacity_units": 119.0,
+        "effective_capacity_units": 119.0,
+        "processed_units": 102.41379310344827,
+        "good_output_units": 100.69255288322225
+      }
+    ]
+  },
+  "scenario": {
+    "good_units": 94.63235294117646,
+    "stages": [
+      {
+        "id": "welding",
+        "input_units": null,
+        "gross_capacity_units": 111.0,
+        "effective_capacity_units": 111.0,
+        "processed_units": 111.0,
+        "good_output_units": 108.0
+      },
+      {
+        "id": "painting",
+        "input_units": 108.0,
+        "gross_capacity_units": 116.0,
+        "effective_capacity_units": 101.5,
+        "processed_units": 101.5,
+        "good_output_units": 96.25
+      },
+      {
+        "id": "assembly",
+        "input_units": 96.25,
+        "gross_capacity_units": 119.0,
+        "effective_capacity_units": 119.0,
+        "processed_units": 96.25,
+        "good_output_units": 94.63235294117646
+      }
+    ]
+  },
+  "lost_good_units": 6.060199942045784,
+  "threshold": {
+    "limit_minutes": 60.0,
+    "equipment_prior_minutes": 0,
+    "projected_minutes": 60.0,
+    "exceeded": false,
+    "scope": "equipment_per_calendar_day"
+  },
+  "assumptions": [
+    "Case totals are scaled uniformly from scheduled_hours to horizon_minutes; this aggregate extrapolation is not a causal or validated forecast.",
+    "The hypothetical stop reduces gross capacity on the selected line in proportion to stop_minutes / horizon_minutes.",
+    "Serial stages pass only available good units forward; queues, buffers, rework, inventory and event start times are not modeled. Only aggregate capacity loss over the horizon is estimated.",
+    "Recorded equipment downtime is not assumed to equal line downtime; prior minutes are matched by equipment_id only.",
+    "The source does not identify critical equipment. The 60-minute threshold is reported as an equipment/day screening limit, not as proof that this asset is critical."
+  ]
+}

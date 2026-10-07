@@ -1,0 +1,28 @@
+{
+  "sections": [
+    {
+      "id": "welding",
+      "status": "warning",
+      "throughput": 14.75,
+      "queue": null,
+      "downtime_minutes": 25,
+      "defect_rate": 0.01694915254237288
+    },
+    {
+      "id": "painting",
+      "status": "warning",
+      "throughput": 14.375,
+      "queue": null,
+      "downtime_minutes": 40,
+      "defect_rate": 0.034782608695652174
+    },
+    {
+      "id": "assembly",
+      "status": "running",
+      "throughput": 15.125,
+      "queue": null,
+      "downtime_minutes": 0,
+      "defect_rate": 0.008264462809917356
+    }
+  ]
+}
