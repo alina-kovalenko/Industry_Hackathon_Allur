@@ -1,3 +1,11 @@
+# Текущее подключение к backend
+
+Экран «Данные сервера» получает состояние и ML-прогноз из Python API. `PredictionSummary` выводит оценки модели по трём участкам, дату наблюдений и ограничения. Остановка отправляется на `/api/scenarios/run`; воспроизведение, история и сброс используют общий серверный сеанс. `session_id` позволяет восстановить экран после перезапуска backend. Остальные вкладки — явно обозначенная локальная демонстрационная симуляция.
+
+Запуск всего приложения: [../docs/LAUNCH.md](../docs/LAUNCH.md). Проверка интеграции: [../docs/AUDIT.md](../docs/AUDIT.md). `npm test` запускает проверки симулятора, отображения ML-прогноза и порядка ответов сервера; `npm run build` проверяет TypeScript и собирает интерфейс. Стили, графика и 3D-модели при исправлении интеграции не менялись.
+
+Ниже сохранено описание исходного демонстрационного интерфейса; его локальные оценки риска не относятся к ML-модели серверного экрана.
+
 # Allur — Factory Intelligence · v2
 
 A complete React + TypeScript frontend for an automotive factory digital twin. It combines a fully interactive 3D production floor, equipment analytics, incident review, and a scenario comparison tool.
