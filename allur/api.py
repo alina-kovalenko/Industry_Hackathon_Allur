@@ -199,8 +199,9 @@ def create_app(initial_case: dict | None = None) -> FastAPI:
     def snapshot():
         return session.capture()[0]
 
-    def dashboard(selected: Date | None, hours: float):
-        data, revision, active_date, _ = session.capture()
+    def dashboard(selected: Date | None, hours: float | None, captured=None):
+        data, revision, active_date, active_hours = captured or session.capture()
+        hours = active_hours if hours is None else hours
         try:
             result = build_dashboard(data, selected.isoformat() if selected else active_date, hours)
         except ValueError as exc:
@@ -211,15 +212,18 @@ def create_app(initial_case: dict | None = None) -> FastAPI:
         result["source"] = data.get("source", "")
         result["prediction"] = predict_risk(history, scheduled_hours=hours)
         result["model"] = model_status()
+        result["session_id"] = session.session_id
         result["revision"] = revision
         return result
 
     @app.get("/api/health")
     def health():
-        return {"status": "ok", "version": "1.1.0", "mode": "local_demo", "revision": session.metadata()["revision"]}
+        metadata = session.metadata()
+        return {"status": "ok", "version": "1.1.0", "mode": "local_demo",
+                "session_id": metadata["session_id"], "revision": metadata["revision"]}
 
     @app.get("/api/dashboard")
-    def get_dashboard(date: Date | None = None, scheduled_hours: Annotated[float, Query(ge=1, le=24, allow_inf_nan=False)] = 8):
+    def get_dashboard(date: Date | None = None, scheduled_hours: Annotated[float | None, Query(ge=1, le=24, allow_inf_nan=False)] = None):
         return dashboard(date, scheduled_hours)
 
     @app.get("/api/model")
@@ -239,10 +243,10 @@ def create_app(initial_case: dict | None = None) -> FastAPI:
 
     @app.get("/api/session")
     def get_session():
-        with lock:
-            result = session.metadata()
-            result["observed_dashboard"] = dashboard(Date.fromisoformat(result["date"]), result["scheduled_hours"])
-            return result
+        data, result = session.capture_session()
+        captured = (data, result["revision"], result["date"], result["scheduled_hours"])
+        result["observed_dashboard"] = dashboard(Date.fromisoformat(result["date"]), result["scheduled_hours"], captured)
+        return result
 
     @app.get("/history")
     @app.get("/api/history")

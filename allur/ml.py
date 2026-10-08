@@ -13,9 +13,34 @@ FEATURES = ["availability_pct", "plan_attainment_pct", "quality_yield_pct"]
 def _load_model(model_dir: Path | None = None) -> dict | None:
     path = (model_dir or DEFAULT_MODEL_DIR) / MODEL_FILE
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        model = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return None
+    # Treat a corrupt or incompatible artifact as unavailable. Without this
+    # check short vectors are silently truncated by zip(), and malformed values
+    # can turn a dashboard request into a 500 response.
+    if not isinstance(model, dict) or model.get("features") != FEATURES:
+        return None
+    try:
+        vectors = [model[name] for name in ("mean", "scale", "coefficients")]
+        if any(not isinstance(vector, list) or len(vector) != len(FEATURES) for vector in vectors):
+            return None
+        numeric = [value for vector in vectors for value in vector]
+        numeric.extend([model["intercept"], model["threshold"]])
+        if any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value)
+               for value in numeric):
+            return None
+        if any(value <= 0 for value in model["scale"]) or not 0 <= model["threshold"] <= 1:
+            return None
+        if not isinstance(model.get("mode"), str) or not isinstance(model.get("horizon"), str):
+            return None
+        if not isinstance(model.get("limitations", []), list) or any(
+            not isinstance(value, str) for value in model.get("limitations", [])
+        ):
+            return None
+    except (KeyError, TypeError):
+        return None
+    return model
 
 
 def model_status(model_dir: Path | None = None) -> dict:

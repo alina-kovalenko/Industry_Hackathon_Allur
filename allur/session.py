@@ -3,6 +3,7 @@ from copy import deepcopy
 from datetime import datetime, timezone
 from threading import RLock
 import time
+from uuid import uuid4
 
 from allur.integration import build_state, calculate_stop_scenario
 
@@ -15,6 +16,7 @@ class LineSession:
         self.case = deepcopy(case)
         self.lock = RLock()
         self.clock = clock
+        self.session_id = str(uuid4())
         self.revision = 0
         self.events = []
         self.event_id = 0
@@ -67,10 +69,29 @@ class LineSession:
             self._tick()
             return deepcopy(self.case), self.revision, self.date, self.hours
 
+    def capture_session(self):
+        """Capture the observed data and session metadata at one replay instant."""
+        with self.lock:
+            self._tick()
+            result = {
+                "session_id": self.session_id,
+                "revision": self.revision,
+                "date": self.date,
+                "scheduled_hours": self.hours,
+                "available_dates": self.dates(),
+                "state": self._state(),
+                "scenario": deepcopy(self.scenario),
+                "replay": {"running": self.replay_running, "interval_seconds": self.interval,
+                           "loop": self.loop},
+                "history_count": len(self.events),
+                "persistence": "session_only",
+            }
+            return deepcopy(self.case), result
+
     def metadata(self):
         with self.lock:
             self._tick()
-            return {"revision": self.revision, "date": self.date, "scheduled_hours": self.hours,
+            return {"session_id": self.session_id, "revision": self.revision, "date": self.date, "scheduled_hours": self.hours,
                     "available_dates": self.dates(), "state": self._state(),
                     "scenario": deepcopy(self.scenario),
                     "replay": {"running": self.replay_running, "interval_seconds": self.interval,
@@ -81,7 +102,7 @@ class LineSession:
         with self.lock:
             self._tick()
             events = [e for e in self.events if e["id"] > after_id]
-            return {"events": deepcopy(events[-limit:]), "revision": self.revision,
+            return {"events": deepcopy(events[-limit:]), "session_id": self.session_id, "revision": self.revision,
                     "latest_id": self.event_id, "retained": len(self.events)}
 
     def apply(self, payload):
