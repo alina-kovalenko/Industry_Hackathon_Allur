@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Activity, Factory, Gauge, Pause, Play, RotateCcw, Timer } from "lucide-react";
 import { KpiCard, PanelTitle } from "./ui";
+import { PredictionSummary, type ModelPrediction } from "./PredictionSummary";
+import { sessionEpochDecision, shouldAcceptHistory } from "../data/sessionOrdering";
 import "../connected.css";
 
 type Section = { id: string; status: string; throughput: number; queue: number | null; downtime_minutes: number; defect_rate: number };
@@ -12,8 +14,8 @@ type ScenarioResult = {
   bottleneck: { after: { name: string; reason: string } };
   threshold: { exceeded: boolean; projected_minutes: number; limit_minutes: number };
 };
-type Dashboard = { kpis: { final_output: number; final_good_output: number; oee_pct: number; defect_pct: number }; prediction: { label: string; limitations: string[] }; downtime: { equipment: string; reason: string; duration_minutes: number }[] };
-type Session = { revision: number; date: string; state: State; scenario: ScenarioResult | null; replay: { running: boolean }; observed_dashboard: Dashboard };
+type Dashboard = { kpis: { final_output: number; final_good_output: number; oee_pct: number; defect_pct: number }; prediction: ModelPrediction; downtime: { equipment: string; reason: string; duration_minutes: number }[] };
+type Session = { session_id: string; revision: number; date: string; state: State; scenario: ScenarioResult | null; replay: { running: boolean }; observed_dashboard: Dashboard };
 type Event = { id: number; kind: string; timestamp: string; date: string; result?: ScenarioResult };
 const names: Record<string, string> = { welding: "Сварка", painting: "Окраска", assembly: "Сборка" };
 const equipment: Record<string, string> = { welding: "ABB-01", painting: "Камера-02", assembly: "Конвейер-03" };
@@ -34,21 +36,38 @@ async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
 export function ConnectedFactory() {
   const [session, setSession] = useState<Session | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
-  const [error, setError] = useState("");
+  const [connectionError, setConnectionError] = useState("");
+  const [actionError, setActionError] = useState("");
   const [busy, setBusy] = useState(false);
   const [section, setSection] = useState("painting");
   const [minutes, setMinutes] = useState(60);
   const [interval, setIntervalSeconds] = useState(3);
   const [syncedAt, setSyncedAt] = useState(0);
   const pollGeneration = useRef(0);
+  const historyRevision = useRef(-1);
+  const activeSessionId = useRef("");
+  const activeEpochRequest = useRef(0);
+  const refreshSequence = useRef(0);
 
   const refresh = useCallback(async (signal?: AbortSignal) => {
+    const requestSequence = ++refreshSequence.current;
     const [next, history] = await Promise.all([
       api<Session>("session", { signal }),
-      api<{ events: Event[] }>("history?limit=20", { signal }),
+      api<{ events: Event[]; revision: number; session_id: string }>("history?limit=20", { signal }),
     ]);
-    setSession(previous => !previous || next.revision >= previous.revision ? next : previous);
-    setEvents(history.events);
+    const epochDecision = sessionEpochDecision(activeSessionId.current, activeEpochRequest.current, next.session_id, requestSequence);
+    if (epochDecision === "stale") return;
+    if (epochDecision === "new") {
+      activeSessionId.current = next.session_id;
+      activeEpochRequest.current = requestSequence;
+      historyRevision.current = -1;
+      setEvents([]);
+    }
+    setSession(previous => !previous || previous.session_id !== next.session_id || next.revision >= previous.revision ? next : previous);
+    if (shouldAcceptHistory(history.session_id, activeSessionId.current, history.revision, historyRevision.current)) {
+      historyRevision.current = history.revision;
+      setEvents(history.events);
+    }
     setSyncedAt(Date.now());
   }, []);
 
@@ -61,9 +80,9 @@ export function ConnectedFactory() {
       const timeout = setTimeout(() => controller.abort(), 10000);
       try {
         await refresh(controller.signal);
-        if (pollGeneration.current === generation) setError("");
+        if (pollGeneration.current === generation) setConnectionError("");
       } catch {
-        if (pollGeneration.current === generation) setError("Нет связи с сервером. Показывается последний полученный срез; повторяем запрос.");
+        if (pollGeneration.current === generation) setConnectionError("Нет связи с сервером. Показывается последний полученный срез; повторяем запрос.");
       } finally {
         clearTimeout(timeout);
         if (pollGeneration.current === generation) timer = setTimeout(poll, 1000);
@@ -75,17 +94,18 @@ export function ConnectedFactory() {
 
   async function action(path: string, body = {}) {
     setBusy(true);
-    setError("");
+    setActionError("");
     try {
       await api(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal: AbortSignal.timeout(15000) });
-      await refresh();
+      await refresh(AbortSignal.timeout(15000));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Запрос не выполнен");
+      setActionError(e instanceof Error ? e.message : "Запрос не выполнен");
     } finally { setBusy(false); }
   }
 
   const result = session?.scenario;
   const kpis = session?.observed_dashboard.kpis;
+  const error = actionError || connectionError;
   return <div className="connected-view">
     <div className="case-toolbar">
       <div><span className={`dot ${error ? "muted-dot" : ""}`} /><strong>{session ? `Тестовый срез · ${session.date}` : "Подключение к серверу…"}</strong>
@@ -141,7 +161,7 @@ export function ConnectedFactory() {
     {session && <section className="panel case-insights"><PanelTitle eyebrow="ИЗ РАСЧЁТНОГО МОДУЛЯ" title="Инциденты и прогноз" />
       {session.observed_dashboard.downtime.map((d, i) => <p key={i}><b>{d.equipment}</b> · {d.reason} · {d.duration_minutes} мин</p>)}
       {!session.observed_dashboard.downtime.length && <p>За выбранную дату инциденты в журнале отсутствуют.</p>}
-      <p><b>Экспериментальная модель:</b> {session.observed_dashboard.prediction.label}</p><p className="case-note">{session.observed_dashboard.prediction.limitations?.join(" ")}</p>
+      <PredictionSummary prediction={session.observed_dashboard.prediction} date={session.date} />
     </section>}
   </div>;
 }
