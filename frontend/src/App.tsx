@@ -109,7 +109,7 @@ export default function App() {
   const constraint = bottleneck(snapshot);
   const shiftEnded = snapshot.elapsed >= SHIFT_SECONDS;
   const age = Math.max(0, Math.floor((now - snapshot.updatedAt) / 1000));
-  const stale = !paused && !shiftEnded && age > 5;
+  const stale = view !== "backend" && !paused && !shiftEnded && age > 5;
   const activeIncidents = snapshot.incidents.filter(
     (i) => i.conditionActive,
   ).length;
@@ -159,7 +159,7 @@ export default function App() {
           className="brand"
           onClick={(e) => {
             e.preventDefault();
-            navigate("overview");
+            navigate("backend");
           }}
           aria-label="Allur home"
         >
@@ -255,7 +255,7 @@ export default function App() {
           <div className="topbar-right">
             <span className="demo-badge">
               <Box size={11} />
-              DEMO DATA
+              {view === "backend" ? "CASE DATA · SERVER" : "DEMO SIMULATION"}
             </span>
             <span className={`connection-status ${stale ? "stale" : ""}`}>
               <span
@@ -305,7 +305,7 @@ export default function App() {
               </h1>
               <p>
                 {view === "backend" ? "Тестовые срезы, расчёты остановки и история — в одном интерфейсе." : view === "overview"
-                  ? "A connected view of production, performance, and what needs your attention."
+                  ? "A simulated view of production, performance, and what needs your attention."
                   : view === "analytics"
                     ? "Understand the performance of each station, from cycle time to quality."
                     : "Explore production decisions with a transparent, repeatable simulation."}
