@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 
 from allur.api import create_app
 from allur.engine import load_case
+from allur.integration import build_state
 from allur.session import LineSession
 
 STOP = {"id": "painting", "equipment_id": "Камера-02", "stop_minutes": 60, "horizon_minutes": 480}
@@ -124,3 +125,35 @@ def test_history_is_bounded_and_sessions_are_isolated_under_concurrent_runs():
     for _ in range(500):
         session.stop_replay()
     assert len(session.events) == 500
+
+
+def test_session_capture_keeps_metadata_and_observed_snapshot_in_one_revision():
+    session = LineSession(load_case())
+    case, metadata = session.capture_session()
+    assert metadata['session_id'] == session.metadata()['session_id']
+    assert metadata['revision'] == 0
+    assert metadata['state'] == build_state(case, metadata['date'], metadata['scheduled_hours'])
+    result = session.apply(STOP)
+    assert result['revision'] == session.metadata()['revision']
+    assert session.history()['session_id'] == metadata['session_id']
+
+
+def test_api_session_cannot_mix_replay_frames_at_a_clock_boundary():
+    app = create_app()
+    session = app.state.session
+    now = [0.0]
+    session.clock = lambda: now[0]
+    session.start_replay(3)
+
+    def advancing_clock():
+        now[0] += 3
+        return now[0]
+
+    # Every clock read crosses a frame boundary. A second capture in the same
+    # request would attach a dashboard from a newer revision to an old state.
+    session.clock = advancing_clock
+    with TestClient(app) as client:
+        result = client.get('/api/session').json()
+    assert result['revision'] == result['observed_dashboard']['revision']
+    assert result['date'] == result['observed_dashboard']['date']
+    assert result['revision'] == session.revision

@@ -1,9 +1,10 @@
 import csv
+import json
 import tempfile
 import unittest
 from pathlib import Path
 
-from allur.ml import predict_risk, model_status
+from allur.ml import FEATURES, predict_risk, model_status
 from scripts.train import make_examples
 
 
@@ -64,6 +65,31 @@ class RiskAdapterTests(unittest.TestCase):
         result = predict_risk([])
         self.assertFalse(result["available"])
         self.assertIsNone(result["score_pct"])
+
+    def test_incompatible_model_artifact_is_reported_unavailable(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "downtime_risk.json"
+            path.write_text(json.dumps({
+                "features": FEATURES,
+                "mode": "broken", "horizon": "next record", "mean": [0],
+                "scale": [1], "coefficients": [1], "intercept": 0, "threshold": 0.5,
+            }), encoding="utf-8")
+            self.assertFalse(model_status(Path(temp))["available"])
+            result = predict_risk([{"line_id": "L1", "date": "2024-01-02", "planned_units": 100,
+                                    "actual_units": 80, "defects": 2, "runtime_hours": 7}], Path(temp))
+            self.assertFalse(result["available"])
+            self.assertIsNone(result["score_pct"])
+
+    def test_nonfinite_model_parameters_are_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "downtime_risk.json"
+            path.write_text(json.dumps({
+                "features": FEATURES,
+                "mode": "broken", "horizon": "next record", "mean": [0, 0, 0],
+                "scale": [1, 1, 1], "coefficients": [1, 1, float("nan")],
+                "intercept": 0, "threshold": 0.5,
+            }, allow_nan=True), encoding="utf-8")
+            self.assertFalse(model_status(Path(temp))["available"])
 
 
 if __name__ == "__main__":

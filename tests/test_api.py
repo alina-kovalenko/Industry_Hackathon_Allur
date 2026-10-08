@@ -100,6 +100,19 @@ def test_metadata_and_model_endpoints(client):
     assert client.get('/api/dashboard').headers['cache-control'] == 'no-store'
 
 
+def test_session_identity_is_stable_per_app_and_present_in_polling_responses():
+    with patch('allur.api.predict_risk', return_value={'available': False, 'limitations': []}):
+        with TestClient(create_app()) as first:
+            first_session = first.get('/api/session').json()
+            first_history = first.get('/history').json()
+            assert first_session['session_id']
+            assert first_history['session_id'] == first_session['session_id']
+            assert first.get('/api/health').json()['session_id'] == first_session['session_id']
+            assert first.get('/api/dashboard').json()['session_id'] == first_session['session_id']
+        with TestClient(create_app()) as second:
+            assert second.get('/api/session').json()['session_id'] != first_session['session_id']
+
+
 def test_teammate_state_contract(client):
     result = client.get('/state?date=2026-10-02').json()
     assert set(result) == {'sections'}
