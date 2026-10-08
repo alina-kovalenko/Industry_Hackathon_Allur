@@ -48,10 +48,16 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "number",
-              "maximum": 24,
-              "minimum": 1,
-              "default": 8,
+              "anyOf": [
+                {
+                  "type": "number",
+                  "maximum": 24,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "title": "Scheduled Hours"
             }
           }
